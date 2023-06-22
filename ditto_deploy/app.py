@@ -5,7 +5,7 @@ import time
 
 from fastapi import FastAPI, HTTPException, Request
 
-from ditto_deploy.utils import create_response, read_annotation_from_deployment
+from ditto_deploy.utils import create_response, is_valid_annotated_value, read_annotation_from_deployment
 
 app = FastAPI()
 logger = logging.getLogger()
@@ -40,6 +40,12 @@ async def mutate(request: Request):
     if ditto_deploy_annotation is None:
         logger.info("Skip: Ditto-Deploy patch not required")
         return create_response(uid)
+
+    if not is_valid_annotated_value(ditto_deploy_annotation):
+        logger.info("Denied: Invalid Annotation")
+        return create_response(
+            uid, allowed=False, code=http.HTTPStatus.UNPROCESSABLE_ENTITY, message="Invalid Annotation"
+        )
 
     start_time = time.time()
     resp = create_response(uid)
