@@ -12,11 +12,11 @@ def process_annotation_from_deployment(d: dict[str, Any]) -> Optional[str]:
         return None
     metadata = d[METADATA_KEY]
 
-    if ANNOTATIONS_KEY not in d:
+    if ANNOTATIONS_KEY not in metadata:
         return None
     annotations: dict = metadata[ANNOTATIONS_KEY]
 
-    if DITTO_DEPLOY_KEY not in d:
+    if DITTO_DEPLOY_KEY not in annotations:
         return None
     return annotations.pop(DITTO_DEPLOY_KEY)
 

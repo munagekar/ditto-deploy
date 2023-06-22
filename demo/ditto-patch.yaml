@@ -4,7 +4,7 @@ metadata:
   name: nginx-deployment
   namespace: testing
   annotations:
-    ditto-deploy: replicas,nginx.limits.cpu,nginx.requests.*
+    ditto-deploy: replicas
 spec:
   selector:
     matchLabels:
