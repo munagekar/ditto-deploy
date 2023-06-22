@@ -5,11 +5,14 @@ import time
 
 from fastapi import FastAPI, HTTPException, Request
 
+from ditto_deploy.utils import create_response, read_annotation_from_deployment
+
 app = FastAPI()
 logger = logging.getLogger()
 
 OLD_OBJECT_KEY = "oldObject"
 OBJECT_KEY = "object"
+UID_KEY = "uid"
 
 
 @app.post("/mutate/deployment")
@@ -18,6 +21,11 @@ async def mutate(request: Request):
 
     json_request = await request.json()
     admission_request = json_request["request"]
+
+    if UID_KEY not in admission_request:
+        raise HTTPException(status_code=http.HTTPStatus.BAD_REQUEST, detail="No UID in admission request")
+
+    uid = admission_request["uid"]
 
     if OLD_OBJECT_KEY not in admission_request or OBJECT_KEY not in admission_request:
         raise HTTPException(status_code=http.HTTPStatus.BAD_REQUEST, detail="Not a Update Request")
@@ -28,15 +36,13 @@ async def mutate(request: Request):
     logger.info("Old Object:\n%s", json.dumps(old_object))
     logger.info("New Object:\n%s", json.dumps(new_object))
 
+    ditto_deploy_annotation = read_annotation_from_deployment(old_object)
+    if ditto_deploy_annotation is None:
+        logger.info("Skip: Ditto-Deploy patch not required")
+        return create_response(uid)
+
     start_time = time.time()
-    resp = {
-        "apiVersion": "admission.k8s.io/v1",
-        "kind": "AdmissionReview",
-        "response": {
-            "allowed": True,
-            "uid": admission_request["uid"],
-        },
-    }
+    resp = create_response(uid)
     end_time = time.time()
     time_ms = int((end_time - start_time) * 1000)
     logger.info("Returned Response in %s ms", time_ms)

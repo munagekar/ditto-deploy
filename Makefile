@@ -22,7 +22,7 @@ fmt:
 	poetry run python -m black .
 
 lint:
-	poetry run python -m mypy ditto_deploy && \
+	poetry run python -m mypy . && \
 	poetry run python -m flake8 ditto_deploy && \
 	poetry run python -m black --check . && \
 	poetry run python -m isort --check .
