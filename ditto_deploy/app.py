@@ -15,7 +15,6 @@ uvicorn_access_logger = logging.getLogger("uvicorn.access")
 log_level = uvicorn_access_logger.level
 logger.setLevel(log_level)
 logger.info("Application Logging Level: %s", log_level)
-logger.handlers = uvicorn_access_logger.handlers
 
 OLD_OBJECT_KEY = "oldObject"
 OBJECT_KEY = "object"
