@@ -1,10 +1,12 @@
-from fastapi import FastAPI, Request
 import http
 import logging
 import time
 
+from fastapi import FastAPI, Request
+
 app = FastAPI()
 logger = logging.getLogger()
+
 
 @app.post("/mutate/deployment")
 async def mutate(request: Request):
