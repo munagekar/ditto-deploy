@@ -1,6 +1,7 @@
 from typing import Any, Optional
 
 DITTO_DEPLOY_KEY = "ditto-deploy"
+DITTO_DEPLOY_APPLIED_KEY = "ditto-deploy/applied"
 METADATA_KEY = "metadata"
 ANNOTATIONS_KEY = "annotations"
 
@@ -16,9 +17,15 @@ def process_annotation_from_deployment(d: dict[str, Any]) -> Optional[str]:
         return None
     annotations: dict = metadata[ANNOTATIONS_KEY]
 
+    annotations.pop(DITTO_DEPLOY_APPLIED_KEY, None)
     if DITTO_DEPLOY_KEY not in annotations:
         return None
+
     return annotations.pop(DITTO_DEPLOY_KEY)
+
+
+def add_applied_annotation_to_deployment(d: dict[str, Any], patch: str) -> None:
+    d[METADATA_KEY][ANNOTATIONS_KEY][DITTO_DEPLOY_APPLIED_KEY] = patch
 
 
 def is_valid_annotated_resource(ar: str) -> bool:
@@ -52,8 +59,11 @@ def is_valid_annotated_value(av: str) -> bool:
 
 
 def create_response(
-        uid: str, allowed: bool = True, code: Optional[int] = None, message: Optional[str] = None,
-        json_patch: str = None,
+        uid: str,
+        allowed: bool = True,
+        code: Optional[int] = None,
+        message: Optional[str] = None,
+        json_patch: Optional[str] = None,
 ) -> dict[str, Any]:
     """
     Create a AddmissionReview Response
@@ -102,7 +112,7 @@ def create_response(
     return resp
 
 
-def process_annotated_resource(ar, dn: dict, do:dict):
+def process_annotated_resource(ar, dn: dict, do: dict):
     """
     Process Deployment configuration for the given annotated resource
 
@@ -122,7 +132,7 @@ def process_annotated_resource(ar, dn: dict, do:dict):
         dn["spec"]["replicas"] = do["spec"]["replicas"]
 
 
-def process_annotated_value(av: str, dn: dict, do:dict) -> None:
+def process_annotated_value(av: str, dn: dict, do: dict) -> None:
     """
     Processes Deployment Configuration for the given annotated value
 

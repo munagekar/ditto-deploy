@@ -1,15 +1,20 @@
 import base64
+import copy
 import http
 import json
-import jsonpatch  # type: ignore
 import logging
 import time
-import copy
 
+import jsonpatch  # type: ignore
 from fastapi import FastAPI, HTTPException, Request
 
-from ditto_deploy.utils import create_response, is_valid_annotated_value, process_annotation_from_deployment, \
-    process_annotated_value
+from ditto_deploy.utils import (
+    create_response,
+    is_valid_annotated_value,
+    process_annotated_value,
+    process_annotation_from_deployment,
+    add_applied_annotation_to_deployment
+)
 
 app = FastAPI()
 
@@ -28,6 +33,7 @@ UID_KEY = "uid"
 
 @app.post("/mutate/deployment")
 async def mutate(request: Request):
+    start_time = time.time()
     logger.debug("Got a Request")
     json_request = await request.json()
     admission_request = json_request["request"]
@@ -60,13 +66,18 @@ async def mutate(request: Request):
 
     process_annotated_value(ditto_deploy_annotation, new_object, old_object)
 
+    # Generate Temporary Patch for annotation
     patch = jsonpatch.JsonPatch.from_diff(new_object_master, new_object)
-    patch = base64.b64encode(str(patch).encode()).decode()
+    patch_str = str(patch)
+    add_applied_annotation_to_deployment(new_object, patch_str)
 
-    logger.info("patch: %s", patch)
+    # final patch to apply
+    final_patch = jsonpatch.JsonPatch.from_diff(new_object_master, new_object)
+    final_patch = base64.b64encode(str(final_patch).encode()).decode()
 
-    start_time = time.time()
-    resp = create_response(uid, json_patch=patch)
+    logger.info("patch: %s", final_patch)
+
+    resp = create_response(uid, json_patch=final_patch)
     end_time = time.time()
     time_ms = int((end_time - start_time) * 1000)
     logger.info("Returned Response in %s ms", time_ms)
