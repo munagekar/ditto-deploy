@@ -1,0 +1,44 @@
+[tool.poetry]
+name = "ditto-deploy"
+version = "0.1.2"
+description = "Ditto Deploy works alongside with your not so intelligent deployment systems like Spinnaker to modify patches to keep the number of replicas consistent with HPA settings to avoid spikes when deploying applications."
+authors = ["Abhishek Munagekar"]
+license = "GPL-3.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.11.4"
+fastapi = "^0.97.0"
+uvicorn = {extras = ["standard"], version = "^0.22.0"}
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+bump2version = "^1.0.1"
+isort = "^5.12.0"
+mypy = "^1.4.0"
+flake8 = "^6.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.black]
+line-length = 120
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 120

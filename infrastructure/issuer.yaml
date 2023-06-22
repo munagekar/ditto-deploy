@@ -1,0 +1,7 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: self-signing-issuer
+  namespace: ditto-deploy
+spec:
+  selfSigned: {}

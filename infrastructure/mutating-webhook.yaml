@@ -1,0 +1,24 @@
+kind: MutatingWebhookConfiguration
+apiVersion: admissionregistration.k8s.io/v1
+metadata:
+  name: ditto-deploy
+  annotations:
+    cert-manager.io/inject-ca-from: ditto-deploy/webhook-certificate
+webhooks:
+  - name: ditto-deploy
+    namespaceSelector:
+      matchLabels:
+        ditto-deploy: enable
+    rules:
+      - operations: [ "CREATE" ]
+        apiGroups: [ "" ]
+        apiVersions: [ "v1" ]
+        resources: [ "pods" ]
+    clientConfig:
+      service:
+        namespace: ditto-deploy
+        name: webhook
+        path: /mutate/deployment
+    failurePolicy: Ignore
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]

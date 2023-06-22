@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webhook
+  namespace: ditto-deploy
+  labels:
+    app: webhook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webhook
+  template:
+    metadata:
+      labels:
+        app: webhook
+    spec:
+      containers:
+        - name: webhook
+          args:
+          - webhook.app:app
+          - --host=0.0.0.0
+          - --port=8443
+          - --ssl-certfile=/cert/tls.crt
+          - --ssl-keyfile=/cert/tls.key
+          - --log-level=info
+          command:
+          - uvicorn
+          image: munagekar/ditto-deploy:0.1.2
+          volumeMounts:
+            - readOnly: true
+              mountPath: /cert
+              name: webhook-certificate
+          ports:
+            - containerPort: 8443
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              scheme: HTTPS
+              port: 8443
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              scheme: HTTPS
+              port: 8443
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 5
+      volumes:
+        - name: webhook-certificate
+          secret:
+            secretName: webhook-certificate
