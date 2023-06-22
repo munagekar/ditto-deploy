@@ -10,7 +10,8 @@ RUN pip install "poetry==$POETRY_VERSION"
 COPY pyproject.toml poetry.lock ./
 
 # Generate requirements.txt using poetry
-RUN poetry export --without-hashes --format=requirements.txt > requirements.txt
+RUN poetry export --without-hashes --format=requirements.txt > requirements.txt && \
+    touch -d @0 requirements.txt
 
 RUN pip install --no-cache --requirement requirements.txt
 

@@ -10,6 +10,7 @@ from ditto_deploy.utils import create_response, is_valid_annotated_value, read_a
 app = FastAPI()
 
 # Setup Logging with Uvicorn Settings
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 uvicorn_access_logger = logging.getLogger("uvicorn.access")
 log_level = uvicorn_access_logger.level
@@ -24,7 +25,6 @@ UID_KEY = "uid"
 @app.post("/mutate/deployment")
 async def mutate(request: Request):
     logger.debug("Got a Request")
-    print("Got a request")
     json_request = await request.json()
     admission_request = json_request["request"]
 
