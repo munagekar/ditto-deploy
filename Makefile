@@ -12,7 +12,7 @@ requirements:
 
 
 build:
-	docker buildx build --platform linux/amd64. -t $(IMAGE)
+	docker buildx build --platform linux/amd64 . -t $(IMAGE)
 
 push: build
 	docker push $(IMAGE)
