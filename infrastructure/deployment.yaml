@@ -26,7 +26,7 @@ spec:
           - --log-level=info
           command:
           - uvicorn
-          image: munagekar/ditto-deploy:0.1.9
+          image: munagekar/ditto-deploy:0.1.10
           volumeMounts:
             - readOnly: true
               mountPath: /cert
