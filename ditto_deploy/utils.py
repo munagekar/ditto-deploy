@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 DITTO_DEPLOY_KEY = "ditto-deploy"
 METADATA_KEY = "metadata"
@@ -44,6 +44,8 @@ def is_valid_annotated_resource(ar: str) -> bool:
     if request_or_limit not in ["requests", "limits", "*"]:
         return False
 
+    return True
+
 
 def is_valid_annotated_value(av: str) -> bool:
     return all(is_valid_annotated_resource(ar) for ar in av.split(","))
@@ -69,7 +71,7 @@ def create_response(
     References:
         https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#response
     """
-    resp = {
+    resp: dict = {
         "apiVersion": "admission.k8s.io/v1",
         "kind": "AdmissionReview",
         "response": {
@@ -81,9 +83,19 @@ def create_response(
     if allowed is True:
         return resp
 
-    if code is not None:
-        resp["response"]["status"]["code"] = code
+    status: dict = {}
+    if code is not None or message is not None:
+        resp["response"]["status"] = status
 
-    if message is not None:
-        resp["response"]["status"]["message"] = message
+        if code is not None:
+            status["code"] = code
+
+        if message is not None:
+            status["message"] = message
+
     return resp
+
+
+def process_annotated_resource(ar):
+    if ar != REPLICAS_ANNOTATION:
+        raise NotImplementedError(f"Annotation={ar} not supported")

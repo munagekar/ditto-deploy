@@ -8,7 +8,14 @@ from fastapi import FastAPI, HTTPException, Request
 from ditto_deploy.utils import create_response, is_valid_annotated_value, read_annotation_from_deployment
 
 app = FastAPI()
+
+# Setup Logging with Uvicorn Settings
 logger = logging.getLogger()
+uvicorn_access_logger = logging.getLogger("uvicorn.access")
+log_level = uvicorn_access_logger.level
+logger.setLevel(log_level)
+logger.info("Application Logging Level: %s", log_level)
+
 
 OLD_OBJECT_KEY = "oldObject"
 OBJECT_KEY = "object"
