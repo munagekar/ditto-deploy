@@ -37,4 +37,6 @@ helm install cert-manager jetstack/cert-manager \
     kubectl apply -f ns.yaml
     kubectl apply -f issuer.yaml
     kubectl apply -f service.yaml
+    kubectl apply -f certificate.yaml
+    kubectl apply -f deployment.yaml
    ```
