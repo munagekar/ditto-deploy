@@ -114,7 +114,7 @@ def process_annotated_resource(ar, dn: dict, do:dict):
     Returns:
 
     """
-    ar = ar.strip
+    ar = ar.strip()
     if ar != REPLICAS_ANNOTATION:
         raise NotImplementedError(f"Annotation={ar} not supported")
 
