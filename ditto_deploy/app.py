@@ -1,11 +1,15 @@
 import http
+import json
 import logging
 import time
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 
 app = FastAPI()
 logger = logging.getLogger()
+
+OLD_OBJECT_KEY = "oldObject"
+OBJECT_KEY = "object"
 
 
 @app.post("/mutate/deployment")
@@ -14,7 +18,15 @@ async def mutate(request: Request):
 
     json_request = await request.json()
     admission_request = json_request["request"]
-    print(admission_request)
+
+    if OLD_OBJECT_KEY not in admission_request or OBJECT_KEY not in admission_request:
+        raise HTTPException(status_code=http.HTTPStatus.BAD_REQUEST, detail="Not a Update Request")
+
+    old_object: dict = admission_request[OLD_OBJECT_KEY]
+    new_object: dict = admission_request[OBJECT_KEY]
+
+    logger.info("Old Object:\n%s", json.dumps(old_object))
+    logger.info("New Object:\n%s", json.dumps(new_object))
 
     start_time = time.time()
     resp = {

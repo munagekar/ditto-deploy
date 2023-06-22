@@ -3,22 +3,22 @@ apiVersion: admissionregistration.k8s.io/v1
 metadata:
   name: ditto-deploy
   annotations:
-    cert-manager.io/inject-ca-from: ditto-deploy/webhook-certificate
+    cert-manager.io/inject-ca-from: ditto-deploy/webhook
 webhooks:
-  - name: ditto-deploy
+  - name: ditto-deploy.munagekar.dev
     namespaceSelector:
       matchLabels:
         ditto-deploy: enable
     rules:
-      - operations: [ "CREATE" ]
-        apiGroups: [ "" ]
+      - operations: [ "UPDATE" ]
+        apiGroups: [ "apps" ]
         apiVersions: [ "v1" ]
-        resources: [ "pods" ]
+        resources: [ "deployments"]
     clientConfig:
       service:
         namespace: ditto-deploy
         name: webhook
         path: /mutate/deployment
-    failurePolicy: Ignore
+    failurePolicy: 'Fail'
     sideEffects: None
     admissionReviewVersions: ["v1", "v1beta1"]

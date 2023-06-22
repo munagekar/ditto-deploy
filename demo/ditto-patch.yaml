@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: nginx-deployment
   namespace: testing
+  annotations:
+    ditto-deploy: spec.replicas
 spec:
   selector:
     matchLabels:
@@ -12,8 +14,6 @@ spec:
     metadata:
       labels:
         app: nginx
-        annotations:
-          ditto-deploy: spec.replicas
     spec:
       containers:
       - name: nginx
