@@ -1,11 +1,15 @@
+import base64
 import http
 import json
+import jsonpatch  # type: ignore
 import logging
 import time
+import copy
 
 from fastapi import FastAPI, HTTPException, Request
 
-from ditto_deploy.utils import create_response, is_valid_annotated_value, read_annotation_from_deployment
+from ditto_deploy.utils import create_response, is_valid_annotated_value, process_annotation_from_deployment, \
+    process_annotated_value
 
 app = FastAPI()
 
@@ -38,11 +42,12 @@ async def mutate(request: Request):
 
     old_object: dict = admission_request[OLD_OBJECT_KEY]
     new_object: dict = admission_request[OBJECT_KEY]
+    new_object_master: dict = copy.deepcopy(new_object)
 
-    logger.info("Old Object:\n%s", json.dumps(old_object))
-    logger.info("New Object:\n%s", json.dumps(new_object))
+    logger.info("Old Object:\n%s", json.dumps(old_object, indent=2))
+    logger.info("New Object:\n%s", json.dumps(new_object, indent=2))
 
-    ditto_deploy_annotation = read_annotation_from_deployment(old_object)
+    ditto_deploy_annotation = process_annotation_from_deployment(new_object)
     if ditto_deploy_annotation is None:
         logger.info("Skip: Ditto-Deploy patch not required")
         return create_response(uid)
@@ -53,8 +58,15 @@ async def mutate(request: Request):
             uid, allowed=False, code=http.HTTPStatus.UNPROCESSABLE_ENTITY, message="Invalid Annotation"
         )
 
+    process_annotated_value(ditto_deploy_annotation, new_object, old_object)
+
+    patch = jsonpatch.JsonPatch.from_diff(new_object_master, new_object)
+    patch = base64.b64encode(str(patch).encode()).decode()
+
+    logger.info("patch: %s", patch)
+
     start_time = time.time()
-    resp = create_response(uid)
+    resp = create_response(uid, json_patch=patch)
     end_time = time.time()
     time_ms = int((end_time - start_time) * 1000)
     logger.info("Returned Response in %s ms", time_ms)

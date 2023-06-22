@@ -7,7 +7,7 @@ ANNOTATIONS_KEY = "annotations"
 REPLICAS_ANNOTATION = "replicas"
 
 
-def read_annotation_from_deployment(d: dict[str, Any]) -> Optional[str]:
+def process_annotation_from_deployment(d: dict[str, Any]) -> Optional[str]:
     if METADATA_KEY not in d:
         return None
     metadata = d[METADATA_KEY]
@@ -18,7 +18,7 @@ def read_annotation_from_deployment(d: dict[str, Any]) -> Optional[str]:
 
     if DITTO_DEPLOY_KEY not in d:
         return None
-    return annotations[DITTO_DEPLOY_KEY]
+    return annotations.pop(DITTO_DEPLOY_KEY)
 
 
 def is_valid_annotated_resource(ar: str) -> bool:
@@ -52,7 +52,8 @@ def is_valid_annotated_value(av: str) -> bool:
 
 
 def create_response(
-    uid: str, allowed: bool = True, code: Optional[int] = None, message: Optional[str] = None
+        uid: str, allowed: bool = True, code: Optional[int] = None, message: Optional[str] = None,
+        json_patch: str = None,
 ) -> dict[str, Any]:
     """
     Create a AddmissionReview Response
@@ -64,6 +65,7 @@ def create_response(
         allowed: True if the admission is allowed else false
         code: HTTP Response Code, ignored if allowed is True
         message: Error message if any to be returned, ignored if allowed is True
+        json_patch: Json Patch, ignored if allowed in false
 
     Returns:
         AdmissionReview Response
@@ -81,6 +83,10 @@ def create_response(
     }
 
     if allowed is True:
+        if json_patch is not None:
+            resp["response"]["patchType"] = "JSONPatch"
+            resp["response"]["patch"] = json_patch
+
         return resp
 
     status: dict = {}
@@ -96,6 +102,33 @@ def create_response(
     return resp
 
 
-def process_annotated_resource(ar):
+def process_annotated_resource(ar, dn: dict, do:dict):
+    """
+    Process Deployment configuration for the given annotated resource
+
+    Args:
+        ar: annotated resource
+        dn: deployment, modified in-place
+        do: deployment, old
+
+    Returns:
+
+    """
+    ar = ar.strip
     if ar != REPLICAS_ANNOTATION:
         raise NotImplementedError(f"Annotation={ar} not supported")
+
+    if ar == REPLICAS_ANNOTATION:
+        dn["spec"]["replicas"] = do["spec"]["replicas"]
+
+
+def process_annotated_value(av: str, dn: dict, do:dict) -> None:
+    """
+    Processes Deployment Configuration for the given annotated value
+
+    Args:
+        av: annotated value
+        dn: deployment new, modified in-place
+        do: deployment old
+    """
+    list(process_annotated_resource(ar, dn, do) for ar in av.split(","))
