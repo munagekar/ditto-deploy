@@ -1,5 +1,5 @@
 DOCKER_REPO := munagekar/ditto-deploy
-VERSION := 0.1.12
+VERSION := 0.1.13
 IMAGE := $(DOCKER_REPO):$(VERSION)
 
 
