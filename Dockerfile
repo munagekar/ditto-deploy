@@ -1,6 +1,3 @@
-# syntax=docker/dockerfile:1.0.0-experimental
-
-
 ## Stage 1
 FROM python:3.11.4 as builder
 

@@ -12,7 +12,7 @@ requirements:
 
 
 build:
-	@DOCKER_BUILDKIT=1 docker build . -t $(IMAGE)
+	docker buildx build --platform linux/amd64. -t $(IMAGE)
 
 push: build
 	docker push $(IMAGE)
