@@ -18,7 +18,7 @@ UID_KEY = "uid"
 @app.post("/mutate/deployment")
 async def mutate(request: Request):
     logger.debug("Got a Request")
-
+    print("Got a request")
     json_request = await request.json()
     admission_request = json_request["request"]
 
