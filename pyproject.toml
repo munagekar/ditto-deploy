@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ditto-deploy"
-version = "0.1.11"
+version = "0.1.12"
 description = "Ditto Deploy works alongside with your not so intelligent deployment systems like Spinnaker to modify patches to keep the number of replicas consistent with HPA settings to avoid spikes when deploying applications."
 authors = ["Abhishek Munagekar"]
 license = "GPL-3.0"
